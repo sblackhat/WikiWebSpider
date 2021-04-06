@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -41,7 +42,7 @@ public class WebSpider {
 				this.links.addAll(urls);
 				for (final URL url : urls) {
 					System.out.println(
-							"time = " + (System.currentTimeMillis() - this.startTime) + " connected to : " + url);
+							"Time : " + LocalTime.now() + " connected to : " + url);
 					final Document document = Jsoup.connect(url.toString()).get();
 					Elements section = document.select("h2 > span#See_also");
 					// Check if the section See also exits
@@ -53,6 +54,7 @@ public class WebSpider {
 								// Skip the links that are not references to other articles
 								if (!child.select("a").isEmpty()) {
 									for (Element e : child.select("a")) {
+										//Check if the url is a reference to another wiki article
 										if (checkURL(child.select("a").first().attr("href"))) {
 											System.out.println("New url : " + BASE_URL + e.attr("href"));
 											newURLS.add(new URL(BASE_URL + child.select("a").first().attr("href")));
@@ -96,14 +98,21 @@ public class WebSpider {
 				
 	}
 
-	public static void main(String[] args) throws IOException {
-		Scanner sc = new Scanner(System.in);
+	public static void main(String[] args) {
+		Scanner sc = null;
+		try {
+		sc = new Scanner(System.in);
 		System.out.println("Introduce the URL : ");
 		String url = sc.next();
 		System.out.println("Introduce the deepness of the WebSpider: ");
 		int deep = sc.nextInt();
 
 		final WebSpider spider = new WebSpider(new URL(url), deep);
+		}catch(IOException e) {
+			e.printStackTrace();
+		}finally {
+			sc.close();
+		}
 
 	}
 
